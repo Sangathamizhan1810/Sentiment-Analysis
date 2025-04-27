@@ -1,11 +1,15 @@
-import streamlit as st
+from tkinter import *
 from textblob import TextBlob
 
 # Function to analyze sentiment
-def analyze_sentiment(user_text):
-    if not user_text:
-        return "Please enter some text."
+def analyze_sentiment():
+    user_text = text_area.get("1.0", "end-1c")
     
+    if not user_text:
+        result_label.config(text="Please enter some text.")
+        return
+
+    # Create a TextBlob object and analyze the sentiment
     blob = TextBlob(user_text)
     polarity = blob.sentiment.polarity
     subjectivity = blob.sentiment.subjectivity
@@ -17,33 +21,30 @@ def analyze_sentiment(user_text):
     else:
         result = "Neutral"
     
-    return f"Sentiment: {result}\nPolarity: {polarity:.2f} | Subjectivity: {subjectivity:.2f}"
+    # Display the result
+    result_label.config(text=f"Sentiment: {result}\nPolarity: {polarity:.2f} | Subjectivity: {subjectivity:.2f}")
 
-# --- Streamlit App UI ---
-st.title("Text Sentiment Analyzer")
+# Initialize main window
+root = Tk()
+root.title("Sentiment Analyzer")
+root.geometry("500x400")
 
-# Initialize session state variables if they don't exist
-if 'result' not in st.session_state:
-    st.session_state.result = ""
-if 'user_text' not in st.session_state:
-    st.session_state.user_text = ""
+# Create widgets
+title_label = Label(root, text="Text Sentiment Analyzer", font=("Helvetica", 16), pady=20)
+title_label.pack()
 
-# Text area for input (using session state for persistent data)
-user_text = st.text_area("Enter Text for Sentiment Analysis:", value=st.session_state.user_text, height=150)
+text_area = Text(root, height=10, width=40, wrap=WORD)
+text_area.pack()
 
-# Save the user input to session state so it's available across reruns
-st.session_state.user_text = user_text
+analyze_button = Button(root, text="Analyze", font=("Helvetica", 12), command=analyze_sentiment)
+analyze_button.pack(pady=10)
 
-# Analyze Button
-if st.button("Analyze"):
-    st.session_state.result = analyze_sentiment(st.session_state.user_text)
+clear_button = Button(root, text="Clear", font=("Helvetica", 12), command=lambda: text_area.delete("1.0", END))
+clear_button.pack(pady=5)
 
-# Display the result
-st.write(st.session_state.result)
+result_label = Label(root, text="", font=("Helvetica", 12), pady=10)
+result_label.pack()
 
-# Clear Button (without rerun)
-if st.button("Clear"):
-    st.session_state.result = ""  # Clear the result
-    st.session_state.user_text = ""  # Clear the text area
-    # Simply resetting session state values is enough to clear the app state
+# Start the Tkinter event loop
+root.mainloop()
 
